@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Invoice Summary</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='users.css') }}">
+</head>
+<body>
+    <h2>Invoice Summary</h2>
+    <form id="summaryForm">
+        <div class="form-group">
+            <label for="summary_type">Select Summary Type</label>
+            <select id="summary_type" name="summary_type">
+                <option value="today">Today</option>
+                <option value="this_week">This Week</option>
+                <option value="year">This Year</option>
+            </select>
+        </div>
+        <button type="submit" class="submit-btn">Get Summary</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('summaryForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const summaryType = document.getElementById('summary_type').value;
+                const resultDiv = document.getElementById('result');
+                
+                fetch('/user_invoice_summary', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `summary_type=${summaryType}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        resultDiv.textContent = `Error: ${data.error}`;
+                        resultDiv.style.color = 'red';
+                    } else {
+                        resultDiv.textContent = `Total: ${data.total}`;
+                        resultDiv.style.color = '#1b4332';
+                    }
+                    resultDiv.style.opacity = 0; // Reset opacity for animation
+                    setTimeout(() => resultDiv.style.opacity = 1, 10); // Trigger fadeIn animation
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    resultDiv.textContent = 'An error occurred';
+                    resultDiv.style.color = 'red';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
